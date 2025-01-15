@@ -87,6 +87,13 @@ const Profile = () => {
         toast.success("Profile image is Updated!");
       }
 
+      // const reader = new FileReader();
+      // reader.onload = () => {
+      //   console.log(reader.result);
+      //   setImage(reader.result);
+      // }
+      // reader.readAsDataURL(file);
+
     }
   };
 
@@ -133,7 +140,7 @@ const Profile = () => {
 
             {
               hoverd && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/50 ring-fuchsia-50 rounded-full"
+                <div className="absolute inset-0 inset-y-14 md:inset-y-6 flex items-center justify-center bg-black/50 rounded-full"
                   onClick={image ? handleDeleteImage : handleFileInputClick}>
                   {image ?
                     <FaTrash className="text-white cursor-pointer text-3xl" />
@@ -160,7 +167,7 @@ const Profile = () => {
             <div className="w-full flex gap-5">
               {
                 colors.map((color, index) => (
-                  <div className={`${color} h-8 w-8 rounded-full cursor-pointer transition-all duration-300 ${selectedColor === index ? "outline outline-white/50 outline-1" : ""}`}
+                  <div className={`${color} h-8 w-8 rounded-full cursor-pointer transition-all duration-200 ${selectedColor === index ? "outline outline-white/70 outline-2" : ""}`}
                     key={index} onClick={() => setSelectedColor(index)}>
 
                   </div>))

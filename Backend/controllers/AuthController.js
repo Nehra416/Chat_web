@@ -187,11 +187,24 @@ const deleteProfileImage = async (req, res, next) => {
     }
 }
 
+const logout = async (req, res, next) => {
+    try {
+        // send a empty cookie which is expire after 1 milisecond
+        res.cookie("jwt", "", { maxAge: 1, secure: true, sameSite: "None" });
+        return res.status(200).send("Logut Successfully");
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send("Internal Server Error");
+    }
+}
+
 export {
     signup,
     login,
     getUserInfo,
     profileUpdate,
     profileImage,
-    deleteProfileImage
+    deleteProfileImage,
+    logout
 }
