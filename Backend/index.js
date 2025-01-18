@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import DbConnection from "./config/DbConnection.js";
 import authRoutes from "./routes/AuthRoutes.js";
+import ContactRoutes from "./routes/ContactRoutes.js";
+import setupSocket from "./socket io/socket.js";
 
 // Load environment variables from.env file
 dotenv.config();
@@ -29,7 +31,10 @@ app.use(cors({
 app.use("/uploads/profiles", express.static("uploads/profiles"));
 
 app.use("/api/auth", authRoutes);
+app.use("/api/contact", ContactRoutes);
 
 
 // Start the server
-app.listen(PORT, () => { console.log('Server is listening on port : ', `http://localhost:${PORT}`) });
+const server = app.listen(PORT, () => { console.log('Server is listening on port : ', `http://localhost:${PORT}`) });
+
+setupSocket(server);
