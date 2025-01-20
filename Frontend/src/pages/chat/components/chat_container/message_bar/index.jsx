@@ -42,7 +42,7 @@ const MessageBar = () => {
 
     const sendMessage = async () => {
         if (selectedChatType === "contact") {
-            console.log("socket is :",socket)
+            // console.log("socket is :",socket)
             socket.emit("sendMessage", {
                 sender: userInfo.id,
                 content: message,
@@ -50,6 +50,7 @@ const MessageBar = () => {
                 messageType: "text",
                 fileUrl: undefined
             });
+            setMessage("");
         }
     };
 

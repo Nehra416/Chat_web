@@ -1,8 +1,27 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import ProfileInfo from './profile_info'
 import SingleMessages from './single_messages'
+import apiClient from '../../../../lib/client_api'
+import { GET_CONTACT_FOR_DM_ROUTES } from '../../../../utils/constants'
+import { useAppStore } from '../../../../store'
+import ContactList from '../../../../components/show contact list/ContactList'
 
 const ContactContainer = () => {
+  const { setDirectMessageContacts, directMessageContacts } = useAppStore();
+
+  useEffect(() => {
+    const getContacts = async () => {
+      const response = await apiClient.get(GET_CONTACT_FOR_DM_ROUTES, { withCredentials: true });
+      console.log("response of contact :", response);
+
+      if (response.data.contacts) {
+        setDirectMessageContacts(response.data.contacts);
+      }
+    }
+
+    getContacts();
+  }, [])
+
   return (
     <div className='relative md:w-[35vw] lg:w-[30vw] xl-[20vw] bg-[#1b1c24] border-r-2 border-[#2f303b]'>
       <div className='pt-3'>
@@ -12,6 +31,9 @@ const ContactContainer = () => {
         <div className='flex items-center justify-between pr-10'>
           <h5 className='uppercase tracking-widest text-neutral-400 pl-10 font-light text-opacity-90 text-sm'>Direct Message</h5>
           <SingleMessages />
+        </div>
+        <div className='max-h-[38vh] overflow-y-auto scrollbar-hidden'>
+          <ContactList contacts={directMessageContacts} />
         </div>
       </div>
       <div className='my-5'>
