@@ -1,4 +1,5 @@
 import Message from "../models/MessagesModel.js";
+import { mkdirSync, renameSync } from "fs";
 
 const getMessages = async (req, res) => {
     try {
@@ -24,6 +25,23 @@ const getMessages = async (req, res) => {
     }
 }
 
+const uploadFile = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).send("File not found");
+        }
+
+        const filePath = req.file.path;
+
+        return res.status(200).json({ filePath });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send("Internal Server Error");
+    }
+}
+
 export {
-    getMessages
+    getMessages,
+    uploadFile
 }
