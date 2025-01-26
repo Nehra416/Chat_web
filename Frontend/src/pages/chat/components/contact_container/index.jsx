@@ -2,12 +2,13 @@ import React, { useEffect } from 'react'
 import ProfileInfo from './profile_info'
 import SingleMessages from './single_messages'
 import apiClient from '../../../../lib/client_api'
-import { GET_CONTACT_FOR_DM_ROUTES } from '../../../../utils/constants'
+import { GET_CONTACT_FOR_DM_ROUTES, GET_USER_CHANNEL_ROUTE } from '../../../../utils/constants'
 import { useAppStore } from '../../../../store'
 import ContactList from '../../../../components/show contact list/ContactList'
+import CreateChannel from './create_channel'
 
 const ContactContainer = () => {
-  const { setDirectMessageContacts, directMessageContacts } = useAppStore();
+  const { setDirectMessageContacts, directMessageContacts, channels, setChannels } = useAppStore();
 
   useEffect(() => {
     const getContacts = async () => {
@@ -19,8 +20,18 @@ const ContactContainer = () => {
       }
     }
 
+    const getChannels = async () => {
+      const response = await apiClient.get(GET_USER_CHANNEL_ROUTE, { withCredentials: true });
+      console.log("response of contact :", response);
+
+      if (response.data.channels) {
+        setChannels(response.data.channels);
+      }
+    }
+
+    getChannels();
     getContacts();
-  }, [])
+  }, [setChannels, setDirectMessageContacts])
 
   return (
     <div className='relative md:w-[35vw] lg:w-[30vw] xl-[20vw] bg-[#1b1c24] border-r-2 border-[#2f303b]'>
@@ -39,6 +50,10 @@ const ContactContainer = () => {
       <div className='my-5'>
         <div className='flex items-center justify-between pr-10'>
           <h5 className='uppercase tracking-widest text-neutral-400 pl-10 font-light text-opacity-90 text-sm'>Channels</h5>
+          <CreateChannel />
+        </div>
+        <div className='max-h-[38vh] overflow-y-auto scrollbar-hidden'>
+          <ContactList contacts={channels} isChannel={true} />
         </div>
       </div>
       <ProfileInfo />

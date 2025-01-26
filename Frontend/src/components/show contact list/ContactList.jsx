@@ -5,7 +5,7 @@ import { HOST } from '../../utils/constants';
 import { getColor } from '../../lib/utils';
 
 const ContactList = ({ contacts, isChannel = false }) => {
-    const { selectedChatData, setSelectedChatData, selectedChatType, setSelectedChatType, setSelectedChatMessages } = useAppStore();
+    const { selectedChatData, setSelectedChatData, selectedChatType, setSelectedChatType, setSelectedChatMessage } = useAppStore();
 
     const handleClick = (contact) => {
         if (isChannel) setSelectedChatType("channel");
@@ -13,7 +13,7 @@ const ContactList = ({ contacts, isChannel = false }) => {
         setSelectedChatData(contact);
 
         if (selectedChatData && selectedChatData._id !== contacts._id) {
-            setSelectedChatMessages([]);
+            setSelectedChatMessage([]);
         }
     }
     console.log("contacts array is :", contacts)

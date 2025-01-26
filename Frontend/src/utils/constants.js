@@ -16,8 +16,15 @@ export const CONTACT_ROUTES = "api/contact";
 
 export const SEARCH_CONTACT_ROUTES = `${CONTACT_ROUTES}/search`;
 export const GET_CONTACT_FOR_DM_ROUTES = `${CONTACT_ROUTES}/get_contact_for_dm`;
+export const GET_ALL_CONTACTS_ROUTES = `${CONTACT_ROUTES}/get_all_contacts`;
 
 
 export const MESSAGES_ROUTES = "api/messages";
 export const GET_ALL_MESSAGES_ROUTE = `${MESSAGES_ROUTES}/get_messages`;
 export const UPLOAD_FILE_ROUTE = `${MESSAGES_ROUTES}/upload_file`;
+
+
+export const CHANNEL_ROUTES = "api/channel";
+export const CREATE_CHANNEL_ROUTE = `${CHANNEL_ROUTES}/create_channel`;
+export const GET_USER_CHANNEL_ROUTE = `${CHANNEL_ROUTES}/get_user_channels`;
+export const GET_CHANNEL_MESSAGES_ROUTE = `${CHANNEL_ROUTES}/get_channel_messages`;

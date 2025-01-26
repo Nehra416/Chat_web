@@ -7,6 +7,7 @@ import authRoutes from "./routes/AuthRoutes.js";
 import ContactRoutes from "./routes/ContactRoutes.js";
 import setupSocket from "./socket io/socket.js";
 import messageRoutes from "./routes/MessagesRoutes.js";
+import channelRoutes from "./routes/ChannelRoutes.js";
 
 // Load environment variables from.env file
 dotenv.config();
@@ -34,6 +35,7 @@ app.use("/uploads/profiles", express.static("uploads/profiles"));
 app.use("/api/auth", authRoutes);
 app.use("/api/contact", ContactRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/channel", channelRoutes);
 
 
 // Start the server
