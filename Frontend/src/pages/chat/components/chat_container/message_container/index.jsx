@@ -9,6 +9,7 @@ import { IoCloseSharp } from "react-icons/io5"
 import { Avatar, AvatarImage } from '../../../../../components/ui/avatar';
 import { AvatarFallback } from '@radix-ui/react-avatar';
 import { getColor } from '../../../../../lib/utils';
+import { toast } from 'sonner';
 
 const MessageContainer = () => {
     const scrollRef = useRef();
@@ -16,6 +17,7 @@ const MessageContainer = () => {
     const [imageUrl, setImageUrl] = useState(null);
     const { selectedChatType, selectedChatData, userInfo, selectedChatMessage, setSelectedChatMessage, setIsDownloading, setFileDownloadProgress } = useAppStore();
 
+    // Fetching the messages of the conversation of channel or direct message
     useEffect(() => {
         const getMessages = async () => {
             try {
@@ -26,7 +28,8 @@ const MessageContainer = () => {
                     setSelectedChatMessage(response.data.messages);
                 }
             } catch (error) {
-                console.log(error);
+                // console.log(error);
+                toast.error(error.response?.data || "Error in message fetching!")
             }
         };
 
@@ -39,7 +42,8 @@ const MessageContainer = () => {
                     setSelectedChatMessage(response.data.messages);
                 }
             } catch (error) {
-                console.log(error);
+                // console.log(error);
+                toast.error(error.response?.data || "Error in message fetching!")
             }
         }
 
@@ -52,6 +56,7 @@ const MessageContainer = () => {
         }
     }, [selectedChatData, selectedChatType, setSelectedChatMessage])
 
+    // For Reach at the bottom (last message) of chat
     useEffect(() => {
         if (scrollRef.current) {
             scrollRef.current.scrollIntoView({ behavior: "smooth" });
@@ -64,7 +69,7 @@ const MessageContainer = () => {
 
         return selectedChatMessage?.map((message, index) => {
             const messageDate = moment(message.timestamp).format("YYYY-MM-DD");
-            const showDate = messageDate !== lastDate;
+            const showDate = messageDate !== lastDate; // Show date once for all message of day on the top where the message of this day start
             lastDate = messageDate;
 
             return (
@@ -90,7 +95,7 @@ const MessageContainer = () => {
 
     const renderDmMessages = (message) => (
         <div className={`${message.sender === selectedChatData._id ? "text-left" : "text-right"}`}>
-
+            {/* Show text message */}
             {
                 message.messageType === "text" && (
                     <div className={`${message.sender !== selectedChatData._id ? "bg-[#8417ff]/5 text-[#8417ff]/90 border-[#8417ff]/50" : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20"} border inline-block p-4 rounded my-1 max-w-[50%] break-words`}>
@@ -98,7 +103,7 @@ const MessageContainer = () => {
                     </div>
                 )
             }
-
+            {/* Show file message*/}
             {
                 message.messageType === "file" && (
                     <div className={`${message.sender !== selectedChatData._id ? "bg-[#8417ff]/5 text-[#8417ff]/90 border-[#8417ff]/50" : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20"} border inline-block p-4 rounded my-1 max-w-[50%] break-words`}>
@@ -113,10 +118,13 @@ const MessageContainer = () => {
                                 </div>
                                 :
                                 <div className='flex items-center justify-center gap-4'>
+                                    {/* ZIP icon */}
                                     <span className='text-white/8 text-3xl bg-black/20 rounded-full p-3'>
                                         <MdFolderZip />
                                     </span>
+                                    {/* Show the name from last like -> abc-12345-file.zip to file.zip*/}
                                     <span>{message.fileUrl.split("-").pop()}</span>
+                                    {/* Download ZIP file */}
                                     <span onClick={() => downloadFile(message.fileUrl)}
                                         className='bg-black/20 p-3 text-2xl rounded-full hover:bg-black/50 cursor-pointer transition-all duration-300'>
                                         <IoMdArrowRoundDown />
@@ -126,7 +134,7 @@ const MessageContainer = () => {
                     </div>
                 )
             }
-
+            {/* Show timestamp of message */}
             <div className='text-xs text-gray-600'>
                 {
                     moment(message.timestamp).format("LT")
@@ -137,6 +145,7 @@ const MessageContainer = () => {
 
     const renderChannelMessages = (message) => {
         return <div className={`mt-5 ${message.sender._id === userInfo.id ? "text-right" : "text-left"}`}>
+            {/* Show the text */}
             {
                 message.messageType === "text" && (
                     <div className={`${message.sender._id === userInfo.id ? "bg-[#8417ff]/5 text-[#8417ff]/90 border-[#8417ff]/50" : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20"} border inline-block p-4 rounded my-1 max-w-[50%] break-words ml-9`}>
@@ -144,7 +153,7 @@ const MessageContainer = () => {
                     </div>
                 )
             }
-
+            {/* Show the file */}
             {
                 message.messageType === "file" && (
                     <div className={`${message.sender._id === userInfo.id ? "bg-[#8417ff]/5 text-[#8417ff]/90 border-[#8417ff]/50" : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20"} border inline-block p-4 rounded my-1 max-w-[50%] break-words`}>
@@ -172,7 +181,7 @@ const MessageContainer = () => {
                     </div>
                 )
             }
-
+            {/* Show avatar and name of other users in channel chat  */}
             {
                 message.sender._id !== userInfo.id ?
                     <div className='flex items-center justify-start gap-3'>
@@ -208,6 +217,8 @@ const MessageContainer = () => {
     }
 
     const downloadFile = async (fileUrl) => {
+        toast.success("Downloading . . .")
+        setShowImage(false);
         // setIsDownloading(true);
         // setFileDownloadProgress(0);
         const response = await apiClient.get(`${HOST}/${fileUrl}`, {
@@ -218,14 +229,21 @@ const MessageContainer = () => {
             //     setFileDownloadProgress(percentCompleted);
             // }
         });
-        const urlBlob = window.URL.createObjectURL(new blob([response.data]));
+        const blob = new Blob([response.data]);
+        const urlBlob = window.URL.createObjectURL(blob);
+
+        // Get file name from fileUrl
+        const filename = fileUrl.split("-").pop();
+
         const link = document.createElement("a");
         link.href = urlBlob;
-        link.setAttribute("download", url.split("-").pop());
+        link.setAttribute("download", filename);
         document.body.appendChild(link);
         link.click();
         link.remove();
+
         window.URL.revokeObjectURL(urlBlob);
+        toast.success("Download Complete");
         // setIsDownloading(false);
         // setFileDownloadProgress(0);
     }

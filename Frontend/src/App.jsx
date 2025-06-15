@@ -1,6 +1,5 @@
-import React, { Children, useEffect, useState } from 'react'
-import { Button } from "@/components/ui/button"
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom"
+import { useEffect, useState } from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import Auth from "./pages/auth/"
 import Chat from './pages/chat'
 import Profile from './pages/profile'
@@ -8,13 +7,13 @@ import { useAppStore } from './store'
 import apiClient from './lib/client_api'
 import { GET_USER_INFO } from './utils/constants'
 
-const AuthRoute = ({children}) => {
+const AuthRoute = ({ children }) => {
   const { userInfo } = useAppStore();
   const isAuthenticated = !!userInfo;
   return isAuthenticated ? <Navigate to="/chat" /> : children;
 };
 
-const PrivateRoute = ({children}) => {
+const PrivateRoute = ({ children }) => {
   const { userInfo } = useAppStore();
   const isAuthenticated = !!userInfo;
   return isAuthenticated ? children : <Navigate to="/auth" />;
@@ -29,7 +28,7 @@ const App = () => {
     const getUserData = async () => {
       try {
         const response = await apiClient.get(GET_USER_INFO, { withCredentials: true });
-        console.log(response);
+        // console.log(response);
         if (response.status === 200 && response.data.user.id) {
           setUserInfo(response.data.user);
         } else {

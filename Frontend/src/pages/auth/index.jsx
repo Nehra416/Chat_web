@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -59,26 +59,32 @@ const Auth = () => {
   };
 
   const handleLogin = async () => {
-    // console.log(loginData);
     if (validateLogin()) {
-      const response = await apiClient.post(LOGIN_ROUTE, { email: loginData.email, password: loginData.password }, { withCredentials: true });
-      // console.log(response); 
-      if (response.data.user.id) {
-        setUserInfo(response.data.user);
-        if (response.data.user.profileSetup) navigate("/chat")
-        else navigate("/profile");
+      try {
+        const response = await apiClient.post(LOGIN_ROUTE, { email: loginData.email, password: loginData.password }, { withCredentials: true });
+        // console.log(response); 
+        if (response.data.user.id) {
+          setUserInfo(response.data.user);
+          if (response.data.user.profileSetup) navigate("/chat")
+          else navigate("/profile");
+        }
+      } catch (error) {
+        toast.error(error.response.data);
       }
     }
   };
 
   const handleSignup = async () => {
-    // console.log(signupData);
     if (validateSignup()) {
-      const response = await apiClient.post(SIGNUP_ROUTE, { email: signupData.email, password: signupData.password }, { withCredentials: true });
-      // console.log(response);
-      if (response.status === 201) {
-        setUserInfo(response.data.user);
-        navigate("/profile");
+      try {
+        const response = await apiClient.post(SIGNUP_ROUTE, { email: signupData.email, password: signupData.password }, { withCredentials: true });
+        // console.log(response);
+        if (response.status === 201) {
+          setUserInfo(response.data.user);
+          navigate("/profile");
+        }
+      } catch (error) {
+        toast.error(error.response.data);
       }
     }
   };
@@ -89,7 +95,7 @@ const Auth = () => {
       <div className='h-[70vh] w-[80vw] border border-gray-200 rounded-xl shadow-xl flex flex-col items-center justify-center '>
         <div className='flex flex-col justify-center items-center gap-2'>
           <h1 className='text-3xl font-medium'>Welcome</h1>
-          <p className='text-sm font-medium'>Fill the details to get started the Chat_web</p>
+          <p className='text-sm font-medium'>Fill the details to get started the <span className='font-bold'>QuickTalk</span></p>
         </div>
         <div>
           {/* login or signup form */}
@@ -98,24 +104,27 @@ const Auth = () => {
               <TabsTrigger value="login" className="w-[50%]">Login</TabsTrigger>
               <TabsTrigger value="signup" className="w-[50%]">SignUp</TabsTrigger>
             </TabsList>
-            <TabsContent className="flex flex-col gap-5 font-medium" value="login">
+            <TabsContent value="login">
               {/* <p>Login in your Account</p> */}
-              {/* <Input type="email" name="email" placeholder="Email" onChange={(e) => console.log(e.target)} /> */}
-              <Input type="email" name="email" placeholder="Email" value={loginData.email}
-                onChange={e => setLoginData({ ...loginData, [e.target.name]: e.target.value })} />
-              <Input type="password" name="password" placeholder="Password" value={loginData.password}
-                onChange={e => setLoginData({ ...loginData, [e.target.name]: e.target.value })} />
-              <Button className="w-full" onClick={handleLogin}>Login</Button>
+              <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-5 font-medium">
+                <Input type="email" name="email" required placeholder="Email" value={loginData.email}
+                  onChange={e => setLoginData({ ...loginData, [e.target.name]: e.target.value })} />
+                <Input type="password" name="password" required placeholder="Password" value={loginData.password}
+                  onChange={e => setLoginData({ ...loginData, [e.target.name]: e.target.value })} />
+                <Button className="w-full" onClick={handleLogin}>Login</Button>
+              </form>
             </TabsContent>
-            <TabsContent className="flex flex-col gap-5 font-medium" value="signup">
+            <TabsContent value="signup">
               {/* <p>Create a new Account</p> */}
-              <Input type="email" name="email" placeholder="Email" value={signupData.email}
-                onChange={e => setSignupData({ ...signupData, [e.target.name]: e.target.value })} />
-              <Input type="password" name="password" placeholder="Password" value={signupData.password}
-                onChange={e => setSignupData({ ...signupData, [e.target.name]: e.target.value })} />
-              <Input type="password" name="confirm_password" placeholder="Confirm Password" value={signupData.confirm_password}
-                onChange={e => setSignupData({ ...signupData, [e.target.name]: e.target.value })} />
-              <Button className="w-full" onClick={handleSignup}>Signup</Button>
+              <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-5 font-medium" >
+                <Input type="email" name="email" required placeholder="Email" value={signupData.email}
+                  onChange={e => setSignupData({ ...signupData, [e.target.name]: e.target.value })} />
+                <Input type="password" name="password" required placeholder="Password" value={signupData.password}
+                  onChange={e => setSignupData({ ...signupData, [e.target.name]: e.target.value })} />
+                <Input type="password" name="confirm_password" required placeholder="Confirm Password" value={signupData.confirm_password}
+                  onChange={e => setSignupData({ ...signupData, [e.target.name]: e.target.value })} />
+                <Button className="w-full" onClick={handleSignup}>Signup</Button>
+              </form>
             </TabsContent>
           </Tabs>
         </div>

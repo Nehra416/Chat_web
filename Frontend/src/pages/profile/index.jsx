@@ -21,6 +21,7 @@ const Profile = () => {
   const [selectedColor, setSelectedColor] = useState(0);
   const inputFileRef = useRef(null);
 
+  // Usefull when a loggedIn user open the profile to show their details
   useEffect(() => {
     if (userInfo.profileSetup === true) {
       setFirstName(userInfo.firstName);
@@ -47,7 +48,7 @@ const Profile = () => {
     if (validateData()) {
       try {
         const response = await apiClient.post(UPDATE_PROFILE_DATA, { firstName, lastName, color: selectedColor }, { withCredentials: true });
-        console.log(response);
+        // console.log(response);
 
         if (response.status === 200 && response.data.user) {
           setUserInfo(response.data.user);
@@ -56,10 +57,12 @@ const Profile = () => {
         }
       } catch (error) {
         console.log(error);
+        toast.error(error.response.data);
       }
     }
   };
 
+  // Return to the chat Funtionality only for LoggedIn user or user who created their profile already
   const goBackFunction = () => {
     if (userInfo.profileSetup) {
       navigate("/chat");
@@ -74,17 +77,22 @@ const Profile = () => {
 
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
-    console.log(file);
+
     if (file) {
       const formData = new FormData();
       formData.append("profileImage", file);
 
-      const response = await apiClient.post(ADD_PROFILE_IMAGE, formData, { withCredentials: true });
-      console.log(response);
+      try {
+        const response = await apiClient.post(ADD_PROFILE_IMAGE, formData, { withCredentials: true });
+        // console.log(response);
 
-      if (response.status === 200 && response.data.image) {
-        setUserInfo({ ...userInfo, image: response.data.image })
-        toast.success("Profile image is Updated!");
+        if (response.status === 200 && response.data.image) {
+          setUserInfo({ ...userInfo, image: response.data.image })
+          toast.success("Profile image is Updated!");
+        }
+      } catch (error) {
+        console.log(error);
+        toast.error(error.response.data);
       }
 
       // const reader = new FileReader();
@@ -100,7 +108,7 @@ const Profile = () => {
   const handleDeleteImage = async () => {
     try {
       const response = await apiClient.delete(DELETE_PROFILE_IMAGE, { withCredentials: true })
-      console.log(response);
+      // console.log(response);
 
       if (response.status === 200) {
         setUserInfo({ ...userInfo, image: null });
@@ -109,6 +117,7 @@ const Profile = () => {
       }
     } catch (error) {
       console.log(error);
+      toast.error(error.response.data);
     }
   };
 

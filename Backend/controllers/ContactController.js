@@ -108,7 +108,7 @@ const getAllContacts = async (req, res, next) => {
             label: user.firstName ? `${user.firstName} ${user.lastName}` : user.email,
             value: user._id
         }))
-        console.log("contact is :", contacts);
+        // console.log("contact is :", contacts);
 
         return res.status(200).json({ contacts });
 

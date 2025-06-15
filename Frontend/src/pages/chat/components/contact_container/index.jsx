@@ -6,26 +6,35 @@ import { GET_CONTACT_FOR_DM_ROUTES, GET_USER_CHANNEL_ROUTE } from '../../../../u
 import { useAppStore } from '../../../../store'
 import ContactList from '../../../../components/show contact list/ContactList'
 import CreateChannel from './create_channel'
+import { toast } from 'sonner'
 
 const ContactContainer = () => {
   const { setDirectMessageContacts, directMessageContacts, channels, setChannels } = useAppStore();
 
   useEffect(() => {
     const getContacts = async () => {
-      const response = await apiClient.get(GET_CONTACT_FOR_DM_ROUTES, { withCredentials: true });
-      console.log("response of contact :", response);
+      try {
+        const response = await apiClient.get(GET_CONTACT_FOR_DM_ROUTES, { withCredentials: true });
+        // console.log("response of contact :", response);
 
-      if (response.data.contacts) {
-        setDirectMessageContacts(response.data.contacts);
+        if (response.data.contacts) {
+          setDirectMessageContacts(response.data.contacts);
+        }
+      } catch (error) {
+        toast.error(error.response.data);
       }
     }
 
     const getChannels = async () => {
-      const response = await apiClient.get(GET_USER_CHANNEL_ROUTE, { withCredentials: true });
-      console.log("response of contact :", response);
+      try {
+        const response = await apiClient.get(GET_USER_CHANNEL_ROUTE, { withCredentials: true });
+        // console.log("response of contact :", response);
 
-      if (response.data.channels) {
-        setChannels(response.data.channels);
+        if (response.data.channels) {
+          setChannels(response.data.channels);
+        }
+      } catch (error) {
+        toast.error(error.response.data);
       }
     }
 
@@ -39,8 +48,9 @@ const ContactContainer = () => {
         {Logo()}
       </div>
       <div className='my-5'>
-        <div className='flex items-center justify-between pr-10'>
-          <h5 className='uppercase tracking-widest text-neutral-400 pl-10 font-light text-opacity-90 text-sm'>Direct Message</h5>
+        <div className='flex items-center justify-between pr-5'>
+          <h5 className='uppercase tracking-widest text-neutral-400 pl-5 font-light text-opacity-90 text-sm'>
+            Direct Message</h5>
           <SingleMessages />
         </div>
         <div className='max-h-[38vh] overflow-y-auto scrollbar-hidden'>
@@ -48,8 +58,9 @@ const ContactContainer = () => {
         </div>
       </div>
       <div className='my-5'>
-        <div className='flex items-center justify-between pr-10'>
-          <h5 className='uppercase tracking-widest text-neutral-400 pl-10 font-light text-opacity-90 text-sm'>Channels</h5>
+        <div className='flex items-center justify-between pr-5'>
+          <h5 className='uppercase tracking-widest text-neutral-400 pl-5 font-light text-opacity-90 text-sm'>
+            Channels</h5>
           <CreateChannel />
         </div>
         <div className='max-h-[38vh] overflow-y-auto scrollbar-hidden'>

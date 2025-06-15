@@ -2,6 +2,7 @@ import User from "../models/AuthModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt"
 import { unlinkSync } from "fs";
+import uploadOnCloudinary from "../utils/uploadOnCloudinary.js";
 
 const maxAge = 4 * 24 * 60 * 60 * 1000;
 
@@ -146,15 +147,30 @@ const profileImage = async (req, res, next) => {
         }
 
         const userId = req.userId;
-        const profileImage = req.file;
+        const profileImageLocalPath = req.file;
 
-        const user = await User.findByIdAndUpdate(userId,
-            { image: profileImage.path },
+        // upload the Profile file on the cloudinary and get the url of the file
+        const profileUrl = await uploadOnCloudinary(profileImageLocalPath);
+        if (!profileUrl?.secure_url) {
+            return res.status(400).send("Error in uploading profile");
+        }
+
+        // fetch user old profile if exist and delete it from the cloudinary
+        const user = await User.findById(userId);
+        if (!userId) {
+            return res.status(400).send("User can't found");
+        }
+        // delete the previous profile image from the cloudinary
+        if (user.image)
+            await deleteFromCloudinary(user?.image);
+
+        const updatedUser = await User.findByIdAndUpdate(userId,
+            { image: profileUrl },
             { new: true, runValidators: true }
         )
 
         return res.status(200).json({
-            image: user.image,
+            image: updatedUser.image,
         });
 
     } catch (error) {
@@ -172,9 +188,13 @@ const deleteProfileImage = async (req, res, next) => {
             return res.status(404).send("User not Found");
         }
 
-        if (user.image) {
-            unlinkSync(user.image);
-        }
+        // delete the previous profile image from the cloudinary
+        if (user.image)
+            await deleteFromCloudinary(user?.image);
+
+        // if (user.image) {
+        //     unlinkSync(user?.image);
+        // }
 
         user.image = null;
         await user.save();

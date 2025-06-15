@@ -1,5 +1,4 @@
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import React from 'react'
 import { getColor } from '../../../../../lib/utils'
 import { useAppStore } from "../../../../../store";
 import { HOST, LOGOUT_ROUTE } from "../../../../../utils/constants";
@@ -17,7 +16,7 @@ const ProfileInfo = () => {
     const Logout = async () => {
         try {
             const response = await client_api.get(LOGOUT_ROUTE, { withCredentials: true });
-            console.log(response);
+            // console.log(response);
 
             if (response.status === 200) {
                 setUserInfo(null);
@@ -26,13 +25,15 @@ const ProfileInfo = () => {
             }
         } catch (error) {
             console.log(error);
+            toast.error(error.response.data);
         }
     };
 
     return (
-        <div className='absolute bottom-0 h-16 flex items-center justify-between px-10 w-full bg-[#2a2b33]'>
+        <div className='absolute bottom-0 h-16 flex items-center justify-between px-4 w-full bg-[#2a2b33]'>
             <div className='flex gap-3 items-center justify-center'>
                 <div className="w-12 h-12 relative">
+                    {/* Profile */}
                     <Avatar className="h-12 w-12 rounded-full overflow-hidden">
                         {userInfo.image ? (
                             <AvatarImage
@@ -48,13 +49,15 @@ const ProfileInfo = () => {
                         )}
                     </Avatar>
                 </div>
-                <div>
+                {/* Name of User */}
+                <div className="truncate max-w-[160px]">
                     {
                         userInfo.firstName && userInfo.lastName ? `${userInfo.firstName} ${userInfo.lastName}` : ""
                     }
                 </div>
             </div>
             <div className="flex gap-5">
+                {/* Edit Button */}
                 <TooltipProvider>
                     <Tooltip>
                         <TooltipTrigger>
@@ -66,6 +69,7 @@ const ProfileInfo = () => {
                         </TooltipContent>
                     </Tooltip>
                 </TooltipProvider>
+                {/* LogOut Button */}
                 <TooltipProvider>
                     <Tooltip>
                         <TooltipTrigger>

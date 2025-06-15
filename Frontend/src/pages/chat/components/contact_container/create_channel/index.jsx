@@ -8,6 +8,7 @@ import { CREATE_CHANNEL_ROUTE, GET_ALL_CONTACTS_ROUTES, SEARCH_CONTACT_ROUTES } 
 import { useAppStore } from '../../../../../store'
 import { Button } from "@/components/ui/button"
 import MultipleSelector from '../../../../../components/ui/multipleselect'
+import { toast } from 'sonner'
 
 const CreateChannel = () => {
     const { setSelectedChatType, setSelectedChatData, addChannel } = useAppStore();
@@ -18,9 +19,13 @@ const CreateChannel = () => {
 
     useEffect(() => {
         const getData = async () => {
-            const response = await apiClient.get(GET_ALL_CONTACTS_ROUTES, { withCredentials: true })
-            console.log(response);
-            setAllContacts(response.data.contacts);
+            try {
+                const response = await apiClient.get(GET_ALL_CONTACTS_ROUTES, { withCredentials: true })
+                // console.log(response);
+                setAllContacts(response.data.contacts);
+            } catch (error) {
+                toast.error(error.response?.data || "Error in getting Channels")
+            }
         }
         getData();
     }, []);
@@ -39,30 +44,16 @@ const CreateChannel = () => {
                     setOpenNewChannelMenu(false);
                     addChannel(response.data.channel);
                 }
+            } else if (channelName.length == 0) {
+                toast.error("Channel name is Required!")
+            } else {
+                toast.error("Select atleast one contact!")
             }
         } catch (error) {
             console.log(error);
+            toast.error(error.response?.data || "Error in create Channel!")
         }
     }
-
-    const searchContactInput = async (searchTerm) => {
-        try {
-            let trimValue = searchTerm.trim();
-            if (trimValue.length > 0) {
-                const response = await apiClient.post(SEARCH_CONTACT_ROUTES, { searchTerm: trimValue }, { withCredentials: true })
-                console.log(response);
-
-                if (response.status === 200 && response.data.contacts) {
-                    setSearchContacts(response.data.contacts);
-                }
-            } else {
-                setSearchContacts([]);
-            }
-
-        } catch (error) {
-            console.log(error);
-        }
-    };
 
     const selectedContact = (contact) => {
         setSelectedChatData(contact);
@@ -91,7 +82,7 @@ const CreateChannel = () => {
             <Dialog open={openNewChannelMenu} onOpenChange={setOpenNewChannelMenu}>
                 <DialogContent className="bg-[#181920] border-none text-white w-[400px] h-[450px] flex flex-col">
                     <DialogHeader>
-                        <DialogTitle className="text-center">Please fill up the details for new channel</DialogTitle>
+                        <DialogTitle className="text-center">Create new channel</DialogTitle>
                         <DialogDescription></DialogDescription>
                     </DialogHeader>
                     <div>

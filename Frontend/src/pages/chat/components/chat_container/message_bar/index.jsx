@@ -7,6 +7,7 @@ import { useAppStore } from '../../../../../store';
 import { useSocket } from '../../../../../context/SocketContext';
 import apiClient from '../../../../../lib/client_api';
 import { UPLOAD_FILE_ROUTE } from '../../../../../utils/constants';
+import { toast } from 'sonner';
 
 const MessageBar = () => {
     const [message, setMessage] = useState("");
@@ -38,9 +39,8 @@ const MessageBar = () => {
 
     // this will add Emoji to the exisisting text 
     const handleAddEmoji = (e) => {
-        // console.log("emoji is ", e);
-        // setMessage(((msj) => msj + e.emoji)); // alternative
-        setMessage(message + e.emoji);
+        setMessage(((msj) => msj + e.emoji));
+        // setMessage(message + e.emoji); // alternative
     };
 
     const sendMessage = async () => {
@@ -74,7 +74,7 @@ const MessageBar = () => {
     const handleFileChange = async (event) => {
         try {
             const file = event.target.files[0];
-            console.log(file);
+            // console.log(file);
 
             if (file) {
                 const formData = new FormData();
@@ -87,7 +87,7 @@ const MessageBar = () => {
                         setFileUploadProgress(Math.round((100 * data.loaded) / data.total))
                     }
                 });
-                console.log(response);
+                // console.log(response);
 
                 if (response.status === 200 && response.data) {
                     setIsUploading(false);
@@ -111,8 +111,9 @@ const MessageBar = () => {
                 }
             }
         } catch (error) {
+            // console.log(error);
             setIsUploading(false);
-            console.log(error);
+            toast.error(error.response?.data || "Error in Uploading File!")
         }
     }
 

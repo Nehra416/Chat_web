@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { FaPlus } from "react-icons/fa"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, } from "@/components/ui/dialog"
@@ -11,18 +11,30 @@ import { ScrollArea } from "../../../../../components/ui/scroll-area"
 import { } from "../../../../../components/ui/avatar"
 import { Avatar, AvatarImage } from '@radix-ui/react-avatar'
 import { useAppStore } from '../../../../../store'
+import { toast } from 'sonner'
 
 const SingleMessages = () => {
     const { setSelectedChatType, setSelectedChatData } = useAppStore();
     const [openNewContactMenu, setOpenNewContactMenu] = useState(false);
     const [searchContacts, setSearchContacts] = useState([]);
+    const [searchTerm, setSearchTerm] = useState("");
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            searchContactInput(searchTerm);
+        }, 500); // 500ms delay
+
+        return () => {
+            clearTimeout(handler); // clear the timeout if the user types again within delay
+        };
+    }, [searchTerm]);
 
     const searchContactInput = async (searchTerm) => {
         try {
             let trimValue = searchTerm.trim();
             if (trimValue.length > 0) {
                 const response = await apiClient.post(SEARCH_CONTACT_ROUTES, { searchTerm: trimValue }, { withCredentials: true })
-                console.log(response);
+                // console.log(response);
 
                 if (response.status === 200 && response.data.contacts) {
                     setSearchContacts(response.data.contacts);
@@ -33,6 +45,7 @@ const SingleMessages = () => {
 
         } catch (error) {
             console.log(error);
+            toast.error(error.response?.data || "Search Failed!");
         }
     };
 
@@ -63,11 +76,11 @@ const SingleMessages = () => {
             <Dialog open={openNewContactMenu} onOpenChange={setOpenNewContactMenu}>
                 <DialogContent className="bg-[#181920] border-none text-white w-[400px] h-[450px] flex flex-col">
                     <DialogHeader>
-                        <DialogTitle className="text-center">Please select a Contact</DialogTitle>
+                        <DialogTitle className="text-center">Select a Contact to Chat</DialogTitle>
                         <DialogDescription></DialogDescription>
                     </DialogHeader>
                     <div>
-                        <Input placeholder="Search Contacts" onChange={(e) => searchContactInput(e.target.value)}
+                        <Input placeholder="Search Contacts" onChange={(e) => setSearchTerm(e.target.value)}
                             className="rounded-lg p-6 border-none bg-[#2c2e3b]" />
                     </div>
                     {/* scrollarea or the search contact div will show when it contain some result only */}
@@ -96,12 +109,12 @@ const SingleMessages = () => {
                                             </div>
                                             {/* display the search contacts name and email */}
                                             <div className='flex flex-col'>
-                                                <span>
+                                                <span className='truncate max-w-[280px]'>
                                                     {
                                                         contact.firstName && contact.lastName ? `${contact.firstName} ${contact.lastName}` : contact.email
                                                     }
                                                 </span>
-                                                <span className='text-xs'>{contact.email}</span>
+                                                <span className='text-xs truncate'>{contact.email}</span>
                                             </div>
                                         </div>)
                                     }
