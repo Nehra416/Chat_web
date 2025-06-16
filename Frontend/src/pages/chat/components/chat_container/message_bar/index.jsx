@@ -14,7 +14,7 @@ const MessageBar = () => {
     const [openEmojiPicker, setOpenEmojiPicker] = useState(false);
     const emojiRef = useRef();
     const inputFileRef = useRef();
-    const { selectedChatType, selectedChatData, userInfo, setIsUploading, setFileUploadProgress } = useAppStore();
+    const { selectedChatType, selectedChatData, userInfo, setIsUploading, addMessage, setFileUploadProgress } = useAppStore();
     const socket = useSocket();
 
     // *****
@@ -80,24 +80,27 @@ const MessageBar = () => {
                 const formData = new FormData();
                 formData.append("file", file);
 
-                setIsUploading(true);
+                // setIsUploading(true);
+                toast.success("File is Uploading . . .")
                 const response = await apiClient.post(UPLOAD_FILE_ROUTE, formData, {
                     withCredentials: true,
-                    onUploadProgress: (data) => {
-                        setFileUploadProgress(Math.round((100 * data.loaded) / data.total))
-                    }
+                    // onUploadProgress: (data) => {
+                    //     setFileUploadProgress(Math.round((100 * data.loaded) / data.total))
+                    // }
                 });
                 // console.log(response);
 
                 if (response.status === 200 && response.data) {
-                    setIsUploading(false);
+                    // setIsUploading(false);
+                    toast.success("File is Uploaded");
                     if (selectedChatType === "contact") {
                         socket.emit("sendMessage", {
                             sender: userInfo.id,
                             content: undefined,
                             recipient: selectedChatData._id,
                             messageType: "file",
-                            fileUrl: response.data.filePath
+                            fileUrl: response.data.filePath,
+                            publicFileUrl: response.data.publicId
                         });
                     } else if (selectedChatType === "channel") {
                         socket.emit("send_channel_message", {
@@ -105,22 +108,30 @@ const MessageBar = () => {
                             content: undefined,
                             messageType: "file",
                             fileUrl: response.data.filePath,
-                            channelId: selectedChatData._id
+                            channelId: selectedChatData._id,
+                            publicFileUrl: response.data.publicId
                         })
                     }
                 }
             }
         } catch (error) {
             // console.log(error);
-            setIsUploading(false);
+            // setIsUploading(false);
             toast.error(error.response?.data || "Error in Uploading File!")
         }
     }
 
+    const handleEnter = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault(); // optional, prevents newline
+            sendMessage();
+        }
+    };
+
     return (
         <div className='h-[10vh] bg-[#c1c1d25] flex justify-center items-center px-8 mb-6 gap-5'>
             <div className='flex flex-1 bg-[#2a2b33] rounded-md items-center gap-5 pr-5'>
-                <input type="text" placeholder='Enter Message' value={message} onChange={(e) => setMessage(e.target.value)}
+                <input type="text" placeholder='Enter Message' onKeyDown={handleEnter} value={message} onChange={(e) => setMessage(e.target.value)}
                     className='flex-1 p-4 bg-transparent rounded-md focus:border-none focus:outline-none' />
                 <button onClick={() => handleAttachmentClick()}
                     className='text-neutral-500 focus:border-none focus:outline-none focus:text-white duration-200 transition-all'>

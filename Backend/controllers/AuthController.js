@@ -1,8 +1,9 @@
 import User from "../models/AuthModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt"
-import { unlinkSync } from "fs";
+import fs from "fs";
 import uploadOnCloudinary from "../utils/uploadOnCloudinary.js";
+import deleteFromCloudinary from "../utils/deleteFromCloudinary.js";
 
 const maxAge = 4 * 24 * 60 * 60 * 1000;
 
@@ -147,7 +148,18 @@ const profileImage = async (req, res, next) => {
         }
 
         const userId = req.userId;
-        const profileImageLocalPath = req.file;
+        const profileImageLocalPath = req.file.path;
+        console.log("image is: ", req.file);
+        console.log("image path: ", req.file.path);
+
+
+        const stats = fs.statSync(profileImageLocalPath);
+        const fileSizeInMB = stats.size / (1024 * 1024);
+
+        if (fileSizeInMB > 30) {
+            fs.unlinkSync(localFilePath); // remove the big file from the server
+            return res.status(400).send("File too large: Must be less then 30 mb");
+        }
 
         // upload the Profile file on the cloudinary and get the url of the file
         const profileUrl = await uploadOnCloudinary(profileImageLocalPath);
@@ -165,7 +177,10 @@ const profileImage = async (req, res, next) => {
             await deleteFromCloudinary(user?.image);
 
         const updatedUser = await User.findByIdAndUpdate(userId,
-            { image: profileUrl },
+            {
+                image: profileUrl?.secure_url,
+                image_public_id: profileUrl?.publicId
+            },
             { new: true, runValidators: true }
         )
 
@@ -189,14 +204,15 @@ const deleteProfileImage = async (req, res, next) => {
         }
 
         // delete the previous profile image from the cloudinary
-        if (user.image)
-            await deleteFromCloudinary(user?.image);
+        if (user.image_public_id)
+            await deleteFromCloudinary(user?.image_public_id);
 
         // if (user.image) {
         //     unlinkSync(user?.image);
         // }
 
         user.image = null;
+        user.image_public_id = null;
         await user.save();
 
         return res.status(200).send("Profile is removed Successfully");

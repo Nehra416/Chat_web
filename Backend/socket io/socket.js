@@ -31,7 +31,7 @@ const setupSocket = (server) => {
             recipient: null,
             content,
             messageType,
-            timestamp: new Date(),
+            createdAt: new Date(),
             fileUrl,
         });
 

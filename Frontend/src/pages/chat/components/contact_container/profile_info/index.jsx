@@ -37,7 +37,7 @@ const ProfileInfo = () => {
                     <Avatar className="h-12 w-12 rounded-full overflow-hidden">
                         {userInfo.image ? (
                             <AvatarImage
-                                src={`${HOST}/${userInfo.image}`} alt="Profile" className="object-cover w-full h-full bg-black" />
+                                src={userInfo.image} alt="Profile" className="object-cover w-full h-full bg-black" />
                         ) : (
                             <div className={`uppercase h-12 w-12 text-lg border-[1px] flex items-center justify-center rounded-full ${getColor(userInfo.color)}`}>
                                 {

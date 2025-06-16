@@ -11,7 +11,7 @@ const uploadOnCloudinary = async (localFilePath) => {
         // file upload on cloudinary
         const res = await cloudinary.uploader.upload(localFilePath, {
             resource_type: "auto",
-            folder: "playBox",
+            folder: "QuickTalk",
             quality: "auto:low"
         })
         // console.log("cloudinary response", res);

@@ -49,7 +49,7 @@ const getContactForDm = async (req, res) => {
                 },
             },
             {
-                $sort: { timestamp: -1 }
+                $sort: { createdAt: -1 }
             },
             {
                 $group: {
@@ -60,7 +60,7 @@ const getContactForDm = async (req, res) => {
                             else: "$sender",
                         }
                     },
-                    lastMessageTime: { $first: "$timestamp" },
+                    lastMessageTime: { $first: "$createdAt" },
                 }
             },
             {

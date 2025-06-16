@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { IoArrowBack } from "react-icons/io5";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { colors, getColor } from "../../lib/utils";
-import { FaTrash, FaPlus } from 'react-icons/fa'
+import { FaTrash, FaPlus, FaSpinner } from 'react-icons/fa'
 import { Input } from "../../components/ui/input"
 import { Button } from "../../components/ui/button"
 import { toast } from "sonner"
@@ -16,9 +16,15 @@ const Profile = () => {
   const { userInfo, setUserInfo } = useAppStore();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [selectedColor, setSelectedColor] = useState(0);
+  const [previousData, setPreviousData] = useState({
+    firstName: "",
+    lastName: "",
+    color: ""
+  })
   const [image, setImage] = useState(null);
   const [hoverd, setHoverd] = useState(false);
-  const [selectedColor, setSelectedColor] = useState(0);
+  const [loading, setLoading] = useState(false);
   const inputFileRef = useRef(null);
 
   // Usefull when a loggedIn user open the profile to show their details
@@ -27,9 +33,15 @@ const Profile = () => {
       setFirstName(userInfo.firstName);
       setLastName(userInfo.lastName);
       setSelectedColor(userInfo.color);
+
+      setPreviousData({
+        firstName: userInfo.firstName,
+        lastName: userInfo.lastName,
+        color: userInfo.color
+      })
     }
     if (userInfo.image) {
-      setImage(`${HOST}/${userInfo.image}`);
+      setImage(userInfo.image);
     }
   }, [userInfo]);
 
@@ -44,20 +56,30 @@ const Profile = () => {
     return true;
   };
 
+  const inputFieldChange =
+    firstName.trim() !== previousData?.firstName.trim() ||
+    lastName.trim() !== previousData?.lastName.trim() ||
+    selectedColor !== previousData?.color;
+
   const saveChanges = async () => {
     if (validateData()) {
       try {
-        const response = await apiClient.post(UPDATE_PROFILE_DATA, { firstName, lastName, color: selectedColor }, { withCredentials: true });
-        // console.log(response);
+        // HIT API call only when atleast one input fields is changed
+        if (inputFieldChange) {
+          const response = await apiClient.post(UPDATE_PROFILE_DATA, { firstName, lastName, color: selectedColor }, { withCredentials: true });
+          // console.log(response);
 
-        if (response.status === 200 && response.data.user) {
-          setUserInfo(response.data.user);
-          toast.success("Profile Updated Successfully!");
-          navigate("/chat");
+          if (response.status === 200 && response.data.user) {
+            setUserInfo(response.data.user);
+            toast.success("Profile Updated Successfully!");
+          }
         }
+
       } catch (error) {
         console.log(error);
         toast.error(error.response.data);
+      } finally {
+        navigate("/chat");
       }
     }
   };
@@ -81,6 +103,7 @@ const Profile = () => {
     if (file) {
       const formData = new FormData();
       formData.append("profileImage", file);
+      setLoading(true);
 
       try {
         const response = await apiClient.post(ADD_PROFILE_IMAGE, formData, { withCredentials: true });
@@ -93,6 +116,8 @@ const Profile = () => {
       } catch (error) {
         console.log(error);
         toast.error(error.response.data);
+      } finally {
+        setLoading(false);
       }
 
       // const reader = new FileReader();
@@ -107,6 +132,7 @@ const Profile = () => {
 
   const handleDeleteImage = async () => {
     try {
+      setLoading(true);
       const response = await apiClient.delete(DELETE_PROFILE_IMAGE, { withCredentials: true })
       // console.log(response);
 
@@ -118,6 +144,8 @@ const Profile = () => {
     } catch (error) {
       console.log(error);
       toast.error(error.response.data);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -148,14 +176,19 @@ const Profile = () => {
             </Avatar>
 
             {
-              hoverd && (
-                <div className="absolute inset-0 inset-y-14 md:inset-y-6 flex items-center justify-center bg-black/50 rounded-full"
-                  onClick={image ? handleDeleteImage : handleFileInputClick}>
-                  {image ?
-                    <FaTrash className="text-white cursor-pointer text-3xl" />
-                    : <FaPlus className="text-white cursor-pointer text-3xl" />}
+              loading ?
+                <div className="absolute inset-0 inset-y-14 md:inset-y-6 flex items-center justify-center bg-black/50 rounded-full">
+                  <FaSpinner className="text-white cursor-pointer text-3xl animate-spin" />
                 </div>
-              )
+                :
+                hoverd && (
+                  <div className="absolute inset-0 inset-y-14 md:inset-y-6 flex items-center justify-center bg-black/50 rounded-full"
+                    onClick={image ? handleDeleteImage : handleFileInputClick}>
+                    {image ?
+                      <FaTrash className="text-white cursor-pointer text-3xl" />
+                      : <FaPlus className="text-white cursor-pointer text-3xl" />}
+                  </div>
+                )
             }
             {/* for the change of profile */}
             <input type="file" ref={inputFileRef} className="hidden" onChange={handleImageChange} name="profileImage" accept=".png, .jpg, .jpeg, .svg" />

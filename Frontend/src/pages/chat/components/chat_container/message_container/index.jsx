@@ -10,22 +10,26 @@ import { Avatar, AvatarImage } from '../../../../../components/ui/avatar';
 import { AvatarFallback } from '@radix-ui/react-avatar';
 import { getColor } from '../../../../../lib/utils';
 import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 
 const MessageContainer = () => {
     const scrollRef = useRef();
     const [showImage, setShowImage] = useState(false);
     const [imageUrl, setImageUrl] = useState(null);
+    const [hasMore, setHasMore] = useState(false);
+    const [page, setPage] = useState(1);
     const { selectedChatType, selectedChatData, userInfo, selectedChatMessage, setSelectedChatMessage, setIsDownloading, setFileDownloadProgress } = useAppStore();
 
     // Fetching the messages of the conversation of channel or direct message
     useEffect(() => {
         const getMessages = async () => {
             try {
-                const response = await apiClient.post(GET_ALL_MESSAGES_ROUTE, { id: selectedChatData._id }, { withCredentials: true });
+                const response = await apiClient.post(`${GET_ALL_MESSAGES_ROUTE}?page=${page}&limit=${15}`, { id: selectedChatData._id }, { withCredentials: true });
                 // console.log("response is:", response);
 
                 if (response.data.messages) {
-                    setSelectedChatMessage(response.data.messages);
+                    setSelectedChatMessage((prevChat) => [...response.data.messages, ...prevChat]);
+                    setHasMore(response.data.hasMore); 
                 }
             } catch (error) {
                 // console.log(error);
@@ -54,7 +58,7 @@ const MessageContainer = () => {
                 getChannelMessages();
             }
         }
-    }, [selectedChatData, selectedChatType, setSelectedChatMessage])
+    }, [selectedChatData, selectedChatType, setSelectedChatMessage, page])
 
     // For Reach at the bottom (last message) of chat
     useEffect(() => {
@@ -68,7 +72,7 @@ const MessageContainer = () => {
         // console.log(selectedChatMessage);
 
         return selectedChatMessage?.map((message, index) => {
-            const messageDate = moment(message.timestamp).format("YYYY-MM-DD");
+            const messageDate = moment(message.createdAt).format("YYYY-MM-DD");
             const showDate = messageDate !== lastDate; // Show date once for all message of day on the top where the message of this day start
             lastDate = messageDate;
 
@@ -77,7 +81,7 @@ const MessageContainer = () => {
                     {
                         showDate && (
                             <div className='text-center text-gray-500 my-2'>
-                                {moment(message.timestamp).format("LL")}
+                                {moment(message.createdAt).format("LL")}
                             </div>
                         )
                     }
@@ -114,7 +118,7 @@ const MessageContainer = () => {
                                     setImageUrl(message.fileUrl)
                                 }}
                                     className='cursor-pointer '>
-                                    <img src={`${HOST}/${message.fileUrl}`} height={300} width={300} />
+                                    <img src={message.fileUrl} height={300} width={300} />
                                 </div>
                                 :
                                 <div className='flex items-center justify-center gap-4'>
@@ -123,7 +127,7 @@ const MessageContainer = () => {
                                         <MdFolderZip />
                                     </span>
                                     {/* Show the name from last like -> abc-12345-file.zip to file.zip*/}
-                                    <span>{message.fileUrl.split("-").pop()}</span>
+                                    <span className='truncate max-w-[50%]'>{message.fileUrl.split("/").pop()}</span>
                                     {/* Download ZIP file */}
                                     <span onClick={() => downloadFile(message.fileUrl)}
                                         className='bg-black/20 p-3 text-2xl rounded-full hover:bg-black/50 cursor-pointer transition-all duration-300'>
@@ -137,7 +141,7 @@ const MessageContainer = () => {
             {/* Show timestamp of message */}
             <div className='text-xs text-gray-600'>
                 {
-                    moment(message.timestamp).format("LT")
+                    moment(message.createdAt).format("LT")
                 }
             </div>
         </div>
@@ -164,7 +168,16 @@ const MessageContainer = () => {
                                     setImageUrl(message.fileUrl)
                                 }}
                                     className='cursor-pointer '>
-                                    <img src={`${HOST}/${message.fileUrl}`} height={300} width={300} />
+                                    {
+                                        message?.status ?
+                                            <div className='flex gap-4'>
+                                                <Loader2 className='animate-spin' />
+                                                <img src={message.fileUrl} height={300} width={300} />
+                                            </div>
+                                            :
+                                            <img src={message.fileUrl} height={300} width={300} />
+                                    }
+                                    {/* <img src={message.fileUrl} height={300} width={300} /> */}
                                 </div>
                                 :
                                 <div className='flex items-center justify-center gap-4'>
@@ -203,9 +216,9 @@ const MessageContainer = () => {
                             }
                         </Avatar>
                         <span className='text-sm text-white/60 '>{`${message.sender.firstName}${message.sender.lastName}`}</span>
-                        <span className='text-sm text-white/60'>{moment(message.timestamp).format("LT")}</span>
+                        <span className='text-sm text-white/60'>{moment(message.createdAt).format("LT")}</span>
                     </div> : <div className='text-sm text-white/60 mt-1'>
-                        {moment(message.timestamp).format("LT")}
+                        {moment(message.createdAt).format("LT")}
                     </div>
             }
         </div>
@@ -221,7 +234,7 @@ const MessageContainer = () => {
         setShowImage(false);
         // setIsDownloading(true);
         // setFileDownloadProgress(0);
-        const response = await apiClient.get(`${HOST}/${fileUrl}`, {
+        const response = await apiClient.get(fileUrl, {
             responseType: "blob",
             // onDownloadProgress: (progressEvent) => {
             //     const { loaded, total } = progressEvent;
@@ -250,12 +263,16 @@ const MessageContainer = () => {
 
     return (
         <div className='scrollbar-hidden flex-1 overflow-y-auto p-4 px-8 md:w-[65vw] lg:w-[70vw] xl-[80vw] w-full'>
+            {hasMore && (
+                <div className='w-full flex justify-center mb-5'>
+                    <button onClick={() => setPage((prevPage) => prevPage + 1)} className='bg-[#2a2b33]/5 hover:bg-[#2a2b33] text-white/80 border-[#ffffff]/20 border p-2 rounded text-sm'>Load Previous</button>
+                </div>
+            )}
             {renderMessages()}
-            <div ref={scrollRef}></div>
             {
                 showImage && <div className='fixed z-[1000] top-0 left-0 h-[100vh] w-[100vw] flex items-center justify-center backdrop-blur-lg flex-col'>
                     <div>
-                        <img src={`${HOST}/${imageUrl}`} alt="Preview image" className='h-[80vh] mt-10 w-full bg-cover' />
+                        <img src={imageUrl} alt="Preview image" className='h-[80vh] mt-10 w-full bg-cover' />
                     </div>
                     <div className='flex gap-5 fixed top-0 mt-4'>
                         <button onClick={() => downloadFile(imageUrl)}
@@ -274,6 +291,7 @@ const MessageContainer = () => {
                     </div>
                 </div>
             }
+            <div ref={scrollRef}></div>
         </div>
     )
 }

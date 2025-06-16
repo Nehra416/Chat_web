@@ -15,7 +15,13 @@ export const createChatSlice = (set, get) => ({
     setFileDownloadProgress: (fileDownloadProgress) => set({ fileDownloadProgress }),
     setSelectedChatType: (selectedChatType) => set({ selectedChatType }),
     setSelectedChatData: (selectedChatData) => set({ selectedChatData }),
-    setSelectedChatMessage: (selectedChatMessage) => set({ selectedChatMessage }),
+    setSelectedChatMessage: (updater) =>
+        set((state) => ({
+            selectedChatMessage:
+                typeof updater === "function"
+                    ? updater(state.selectedChatMessage)
+                    : updater,
+        })),
     setDirectMessageContacts: (directMessageContacts) => set({ directMessageContacts }),
     closeChat: () => set({ selectedChatData: undefined, selectedChatType: undefined, selectedChatMessage: [] }),
     addChannel: (channel) => {
@@ -23,7 +29,7 @@ export const createChatSlice = (set, get) => ({
         set({ channels: [channel, ...channels] })
     },
     addMessage: (message) => {
-        console.log("message in AddMessage :", message);
+        // console.log("message in AddMessage :", message);
         const selectedChatMessage = get().selectedChatMessage;
         const selectedChatType = get().selectedChatType;
 
@@ -57,7 +63,7 @@ export const createChatSlice = (set, get) => ({
         const data = dmContacts.find((contact) => contact._id === fromId);
         const index = dmContacts.findIndex((contact) => contact._id === fromId);
         console.log({ data, index, dmContacts, userId, message, fromData });
-        
+
         if (index !== -1 && index !== undefined) {
             dmContacts.splice(index, 1);
             dmContacts.unshift(data);
