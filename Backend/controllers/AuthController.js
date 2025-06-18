@@ -1,8 +1,7 @@
 import User from "../models/AuthModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt"
-import fs from "fs";
-import uploadOnCloudinary from "../utils/uploadOnCloudinary.js";
+import uploadOnCloudinary2 from "../utils/uploadOnCloudinary2.js";
 import deleteFromCloudinary from "../utils/deleteFromCloudinary.js";
 
 const maxAge = 4 * 24 * 60 * 60 * 1000;
@@ -148,21 +147,16 @@ const profileImage = async (req, res, next) => {
         }
 
         const userId = req.userId;
-        const profileImageLocalPath = req.file.path;
-        console.log("image is: ", req.file);
-        console.log("image path: ", req.file.path);
 
+        // Check file size from memory buffer
+        const fileSizeInMB = req.file.buffer.length / (1024 * 1024);
 
-        const stats = fs.statSync(profileImageLocalPath);
-        const fileSizeInMB = stats.size / (1024 * 1024);
-
-        if (fileSizeInMB > 30) {
-            fs.unlinkSync(localFilePath); // remove the big file from the server
-            return res.status(400).send("File too large: Must be less then 30 mb");
+        if (fileSizeInMB > 3) {
+            return res.status(400).send("File too large: Must be less then 3 mb");
         }
 
         // upload the Profile file on the cloudinary and get the url of the file
-        const profileUrl = await uploadOnCloudinary(profileImageLocalPath);
+        const profileUrl = await uploadOnCloudinary2(req.file.buffer);
         if (!profileUrl?.secure_url) {
             return res.status(400).send("Error in uploading profile");
         }
@@ -172,9 +166,10 @@ const profileImage = async (req, res, next) => {
         if (!userId) {
             return res.status(400).send("User can't found");
         }
-        // delete the previous profile image from the cloudinary
+
+        // delete the previous profile image from the cloudinary if exists
         if (user.image)
-            await deleteFromCloudinary(user?.image);
+            await deleteFromCloudinary(user?.image_public_id);
 
         const updatedUser = await User.findByIdAndUpdate(userId,
             {

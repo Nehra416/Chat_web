@@ -1,6 +1,5 @@
 import Message from "../models/MessagesModel.js";
-import { mkdirSync, renameSync } from "fs";
-import uploadOnCloudinary from "../utils/uploadOnCloudinary.js";
+import uploadOnCloudinary2 from "../utils/uploadOnCloudinary2.js";
 
 const getMessages = async (req, res) => {
     try {
@@ -48,10 +47,15 @@ const uploadFile = async (req, res) => {
             return res.status(400).send("File not found");
         }
 
-        const filePath = req.file.path;
+        // Check file size from memory buffer
+        const fileSizeInMB = req.file.buffer.length / (1024 * 1024);
+
+        if (fileSizeInMB > 5) {
+            return res.status(400).send("File too large: Must be less then 5 mb");
+        }
 
         // Upload media on the cloudinary then send the url to the frontend
-        const cloudinaryResponse = await uploadOnCloudinary(filePath);
+        const cloudinaryResponse = await uploadOnCloudinary2(req.file.buffer);
         if (!cloudinaryResponse) {
             return res.status(500).send("Error in file upload");
         }

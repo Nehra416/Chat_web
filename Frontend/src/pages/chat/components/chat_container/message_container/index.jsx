@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useAppStore } from '../../../../../store';
 import moment from "moment";
-import { GET_ALL_MESSAGES_ROUTE, GET_CHANNEL_MESSAGES_ROUTE, HOST } from '../../../../../utils/constants';
+import { GET_ALL_MESSAGES_ROUTE, GET_CHANNEL_MESSAGES_ROUTE } from '../../../../../utils/constants';
 import apiClient from "../../../../../lib/client_api";
 import { MdFolderZip } from "react-icons/md"
 import { IoMdArrowRoundDown } from "react-icons/io"
@@ -202,7 +202,7 @@ const MessageContainer = () => {
                             {
                                 message.sender.image && (
                                     <AvatarImage
-                                        src={`${HOST}/${message.sender.image}`} alt="Profile" className="object-cover w-full h-full bg-black" />
+                                        src={message.sender.image} alt="Profile" className="object-cover w-full h-full bg-black" />
                                 )
                             }
                             {

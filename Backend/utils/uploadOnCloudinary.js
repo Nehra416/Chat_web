@@ -1,6 +1,7 @@
 import cloudinary from "../config/CloudinaryConfig.js";
 import fs from "fs";
 
+// Use this when we will work with diskStorage (in multer)
 const uploadOnCloudinary = async (localFilePath) => {
     try {
         if (!localFilePath) {

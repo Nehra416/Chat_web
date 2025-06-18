@@ -1,7 +1,7 @@
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { getColor } from '../../../../../lib/utils'
 import { useAppStore } from "../../../../../store";
-import { HOST, LOGOUT_ROUTE } from "../../../../../utils/constants";
+import { LOGOUT_ROUTE } from "../../../../../utils/constants";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { FiEdit2 } from "react-icons/fi"
 import { useNavigate } from "react-router-dom";

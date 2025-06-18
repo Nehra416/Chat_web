@@ -6,7 +6,7 @@ import { Input } from "../../../../../components/ui/input"
 import Lottie from "react-lottie";
 import { animationDefaultOptions, getColor } from '../../../../../lib/utils';
 import apiClient from "../../../../../lib/client_api"
-import { HOST, SEARCH_CONTACT_ROUTES } from "../../../../../utils/constants"
+import { SEARCH_CONTACT_ROUTES } from "../../../../../utils/constants"
 import { ScrollArea } from "../../../../../components/ui/scroll-area"
 import { } from "../../../../../components/ui/avatar"
 import { Avatar, AvatarImage } from '@radix-ui/react-avatar'
@@ -95,7 +95,7 @@ const SingleMessages = () => {
                                                 <Avatar className="h-12 w-12 rounded-full overflow-hidden">
                                                     {contact.image ? (
                                                         <AvatarImage
-                                                            src={`${HOST}/${contact.image}`} alt="Profile" className="object-cover w-full h-full bg-black rounded-full" />
+                                                            src={contact.image} alt="Profile" className="object-cover w-full h-full bg-black rounded-full" />
                                                     ) : (
                                                         <div className={`uppercase h-12 w-12 text-lg border-[1px] flex items-center justify-center rounded-full ${getColor(contact.color)}`}>
                                                             {

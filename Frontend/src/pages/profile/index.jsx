@@ -9,7 +9,7 @@ import { Input } from "../../components/ui/input"
 import { Button } from "../../components/ui/button"
 import { toast } from "sonner"
 import apiClient from '../../lib/client_api'
-import { ADD_PROFILE_IMAGE, DELETE_PROFILE_IMAGE, HOST, UPDATE_PROFILE_DATA } from '../../utils/constants'
+import { ADD_PROFILE_IMAGE, DELETE_PROFILE_IMAGE, UPDATE_PROFILE_DATA } from '../../utils/constants'
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -150,12 +150,12 @@ const Profile = () => {
   };
 
   return (
-    <div className="bg-[#1b1c24] h-[100vh] flex items-center justify-center flex-col gap-10">
+    <div className="bg-[#1b1c24] min-h-[100vh] flex items-center justify-center flex-col gap-10 py-2">
       <div className="flex flex-col gap-10 w-[80vw] md:w-max">
         <div>
           <IoArrowBack onClick={goBackFunction} className="text-4xl lg:text-6xl text-white/90 cursor-pointer" />
         </div>
-        <div className="grid grid-cols-2">
+        <div className="grid md:grid-cols-2 gap-5">
           <div className="h-full w-32 md:w-48 relative flex items-center justify-center"
             onMouseEnter={() => setHoverd(true)}
             onMouseLeave={() => setHoverd(false)}

@@ -39,6 +39,8 @@ app.use("/api/channel", channelRoutes);
 
 
 // Start the server
-const server = app.listen(PORT, () => { console.log('Server is listening on port : ', `http://localhost:${PORT}`) });
+const server = app.listen(PORT, () => {
+    console.log('Server is listening on port : ', PORT);
+});
 
 setupSocket(server);
