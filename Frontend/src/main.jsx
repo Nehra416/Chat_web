@@ -4,6 +4,7 @@ import './index.css'
 import App from './App.jsx'
 import { Toaster } from "./components/ui/sonner.jsx"
 import { SocketProvider } from './context/SocketContext.jsx'
+import { Analytics } from '@vercel/analytics/react';
 
 createRoot(document.getElementById('root')).render(
   // <StrictMode>
@@ -11,6 +12,7 @@ createRoot(document.getElementById('root')).render(
     <SocketProvider>
       <App />
       <Toaster closeButton />
+      <Analytics mode="production" />
     </SocketProvider>
   </>
   // </StrictMode>,
